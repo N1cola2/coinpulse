@@ -55,12 +55,12 @@ const columns: DataTableColumn<TrendingCoin>[] = [
 ];
 
 const Page = async () => {
-  const coin = await fetcher<CoinDetailsData>("/coins/bitcoin", {
+  const coin = await fetcher<CoinDetailsData>("coins/bitcoin", {
     dex_pair_format: "symbol",
   });
 
   const trendingResponse = await fetcher<{ coins: TrendingCoin[] }>(
-    "/search/trending",
+    "search/trending",
   );
   const trendingCoins = trendingResponse.coins;
 
