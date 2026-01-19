@@ -3,7 +3,8 @@ import Image from "next/image";
 import DataTable from "@/components/DataTable";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+import { fetcher } from "@/lib/coingecko.actions";
 
 const columns: DataTableColumn<TrendingCoin>[] = [
   {
@@ -53,89 +54,15 @@ const columns: DataTableColumn<TrendingCoin>[] = [
   },
 ];
 
-const Page = () => {
-  const trendingCoins: TrendingCoin[] = [
-    {
-      item: {
-        id: "bitcoin",
-        name: "Bitcoin",
-        symbol: "BTC",
-        market_cap_rank: 1,
-        thumb: "/logo.svg",
-        large: "/logo.svg",
-        data: {
-          price: 89113.0,
-          price_change_percentage_24h: {
-            usd: 2.5,
-          },
-        },
-      },
-    },
-    {
-      item: {
-        id: "ethereum",
-        name: "Ethereum",
-        symbol: "ETH",
-        market_cap_rank: 2,
-        thumb: "/logo.svg",
-        large: "/logo.svg",
-        data: {
-          price: 2456.78,
-          price_change_percentage_24h: {
-            usd: -1.2,
-          },
-        },
-      },
-    },
-    {
-      item: {
-        id: "solana",
-        name: "Solana",
-        symbol: "SOL",
-        market_cap_rank: 3,
-        thumb: "/logo.svg",
-        large: "/logo.svg",
-        data: {
-          price: 123.45,
-          price_change_percentage_24h: {
-            usd: 5.7,
-          },
-        },
-      },
-    },
-    {
-      item: {
-        id: "cardano",
-        name: "Cardano",
-        symbol: "ADA",
-        market_cap_rank: 4,
-        thumb: "/logo.svg",
-        large: "/logo.svg",
-        data: {
-          price: 0.345,
-          price_change_percentage_24h: {
-            usd: -0.8,
-          },
-        },
-      },
-    },
-    {
-      item: {
-        id: "polygon",
-        name: "Polygon",
-        symbol: "MATIC",
-        market_cap_rank: 5,
-        thumb: "/logo.svg",
-        large: "/logo.svg",
-        data: {
-          price: 0.567,
-          price_change_percentage_24h: {
-            usd: 3.1,
-          },
-        },
-      },
-    },
-  ];
+const Page = async () => {
+  const coin = await fetcher<CoinDetailsData>("/coins/bitcoin", {
+    dex_pair_format: "symbol",
+  });
+
+  const trendingResponse = await fetcher<{ coins: TrendingCoin[] }>(
+    "/search/trending",
+  );
+  const trendingCoins = trendingResponse.coins;
 
   return (
     <main className="main-container p-6">
@@ -143,14 +70,16 @@ const Page = () => {
         <div id="coin-overview" className="mb-8">
           <div className="header flex items-center gap-4">
             <Image
-              src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png"
-              alt="Bitcoin"
+              src={coin.image.large}
+              alt={coin.name}
               width={56}
               height={56}
             />
             <div className="info">
-              <p className="name text-gray-500">BitCoin / BTC</p>
-              <h1 className="text-3xl font-bold">$89,113.00</h1>
+              <p>
+                {coin.name} / {coin.symbol.toUpperCase()}
+              </p>
+              <h1>{formatCurrency(coin.market_data.current_price.usd)}</h1>
             </div>
           </div>
         </div>
